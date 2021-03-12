@@ -1,0 +1,36 @@
+--Tutorijal 3
+--Z1:
+SELECT sysdate "DATE", USER
+FROM dual;
+
+--Z2
+SELECT e.employee_id AS sifra,
+       e.first_name || ' ' || e.last_name AS naziv,
+       e.salary AS plata,
+       (e.salary * 1.25) AS "Plata uvecana za 25%"
+FROM employees e;
+
+--Z3
+SELECT e.employee_id AS sifra,
+       e.first_name || ' ' || e.last_name AS naziv,
+       e.salary AS plata,
+       (e.salary * 1.25) AS "Plata uvecana za 25%",
+       lpad(To_Char(Mod(e.salary,100)), 2, '0') AS "ostatak plate"
+FROM employees e;
+
+--Z4
+SELECT e.first_name || ' ' || e.last_name AS naziv,
+       e.hire_date AS "datum saposljenja",
+       To_Char(next_day(Add_Months(e.hire_date,6),'MON'),'DAY-MONTH,YYYY')
+FROM employees e;
+
+--Z5
+SELECT e.first_name || ' ' || e.last_name AS naziv,
+      d.department_name AS "naziv odjela",
+      r.region_name AS "kontinent",
+      Abs(Round(Months_Between(e.hire_date,SYSDATE))) AS "Koliko dugo je zaposlen"
+FROM employees e, departments d, regions r, locations l, countries c
+WHERE e.department_id = d.department_id AND
+      d.location_id = l.location_id AND
+      l.country_id = c.country_id AND
+      c.region_id = r.region_id;

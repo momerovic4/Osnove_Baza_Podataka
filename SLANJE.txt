@@ -1,0 +1,85 @@
+--1.
+SELECT Sum(Length(Drzava)*7+Length(Grad)*7+Length(Kontinent)*7) FROM
+(SELECT k.naziv AS Kontinent, Nvl(d.naziv, 'Nema drzave') AS Drzava, Nvl(g.naziv, 'Nema grada') AS Grad
+FROM Kontinent k, Drzava d, grad g
+WHERE k.kontinent_id = d.kontinent_id(+) AND d.drzava_id = g.drzava_id(+));
+
+--2.
+SELECT SUM(LENGTH(naziv)*7) FROM
+(SELECT distinct p.naziv
+FROM PRAVNO_LICE p,UGOVOR_ZA_PRAVNO_LICE u
+WHERE (To_Char(u.datum_potpisivanja,'yyyy')>='2015'
+AND To_Char(u.datum_potpisivanja,'yyyy')<='2016')
+AND u.pravno_lice_id=p.pravno_lice_id);
+
+--3.
+SELECT SUM(Length(Drzava)*7 + Length(proizvod)*7 + kolicina_proizvoda*7) FROM
+(SELECT d.naziv AS drzava, p.naziv AS proizvod, k.kolicina_proizvoda AS kolicina_proizvoda
+FROM drzava d, proizvod p, kolicina k, lokacija l, grad g, skladiste s
+WHERE g.drzava_id = d.drzava_id AND l.grad_id=g.grad_id AND s.lokacija_id = l.lokacija_id
+AND s.skladiste_id = k.skladiste_id AND k.proizvod_id = p.proizvod_id
+AND k.kolicina_proizvoda > 50 AND d.naziv NOT LIKE '%ss%');
+
+--4.
+SELECT Sum(Length(naziv)*7) FROM
+(SELECT DISTINCT p.naziv, p.broj_mjeseci_garancije * 18772
+FROM proizvod p, popust po, narudzba_proizvoda np
+WHERE p.proizvod_id = np.proizvod_id AND po.popust_id = np.popust_id
+AND po.postotak > 0
+AND MOD(p.broj_mjeseci_garancije,3) = 0);
+
+--5.
+SELECT Sum(Length("ime i prezime")*7+Length("Naziv odjela")*7)
+FROM
+(SELECT fl.ime || ' ' || fl.prezime AS "ime i prezime", o.naziv AS "Naziv odjela"
+FROM fizicko_lice fl, odjel o, uposlenik u, kupac k
+WHERE o.sef_id <> u.uposlenik_id AND fl.fizicko_lice_id = k.kupac_id
+AND fl.fizicko_lice_id = u.uposlenik_id AND u.odjel_id = o.odjel_id);
+
+--6.
+SELECT Sum(NARUDZBA_ID*7+cijena*7+postotak*7) FROM
+(SELECT n.narudzba_id AS Narudzba_id, p.cijena AS Cijena, nvl(pos.postotak,0) AS postotak
+FROM NARUDZBA_PROIZVODA n, PROIZVOD p, POPUST pos
+WHERE n.PROIZVOD_ID=p.PROIZVOD_ID AND n.POPUST_ID = pos.POPUST_ID(+) AND p.CIJENA*(nvl(pos.POSTOTAK,0)/100)<200);
+
+--7.
+SELECT Sum(Length("Kategorija")*7+Length("Nadkategorija")*7) FROM
+(SELECT k1.naziv "Kategorija", Decode(Nvl(k1.nadkategorija_id, 0), 0, 'Nema kategorije', 1 , 'Komp Oprema', k2.naziv) "Nadkategorija"
+FROM kategorija k1, kategorija k2
+WHERE k1.nadkategorija_id =  k2.kategorija_id(+));
+
+--8.
+SELECT Sum(godina*7+mjeseci*7+dana*7) FROM
+(SELECT trunc(months_between(To_Date('10.10.2020','dd.mm.yyyy'), upl.datum_potpisivanja) / 12) as Godina
+,trunc(mod(months_between(To_Date('10.10.2020','dd.mm.yyyy'), upl.datum_potpisivanja), 12)) as Mjeseci
+,trunc(To_Date('10.10.2020','dd.mm.yyyy') - add_months(upl.datum_potpisivanja, trunc(months_between(To_Date('10.10.2020','dd.mm.yyyy'), upl.datum_potpisivanja)))) as Dana
+FROM  ugovor_za_pravno_lice upl
+WHERE (Months_Between(To_Date('10.01.2020','dd.mm.yyyy'), trunc(upl.datum_potpisivanja)) / 12) >  to_number(SubStr(upl.ugovor_id,0,2)));
+
+--9.
+SELECT SUM(Length(ime)*7+Length(prezime)*7+Length(Odjel)*7) FROM
+(SELECT f.ime AS ime,  f.prezime AS prezime,
+Decode(o.naziv,
+  'Management', 'MANAGER',
+  'Human resources', 'HUMAN',
+  'OTHER') AS odjel
+FROM odjel o, uposlenik u, fizicko_lice f
+WHERE f.fizicko_lice_id = u.uposlenik_id AND u.odjel_id = o.odjel_id
+ORDER BY f.ime ASC , f.prezime DESC)
+WHERE ROWNUM<2;
+
+
+--10.
+SELECT SUM(Length(Najjeftiniji)*7+ZCijena*7) FROM
+(SELECT k.naziv, p1.naziv AS Najskuplji, p2.naziv AS Najjeftiniji, t1.max_price + t1.min_price AS ZCijena
+FROM  (
+  SELECT k.naziv AS Category,  Max(cijena) max_price, Min(cijena) min_price
+  FROM kategorija k
+  INNER JOIN proizvod p ON  p.kategorija_id=k.kategorija_id
+  GROUP BY k.naziv
+ ) t1
+ INNER JOIN kategorija k ON k.naziv = t1.Category
+ INNER JOIN proizvod  p1 ON p1.cijena = t1.max_price
+ INNER JOIN proizvod  p2 ON p2.cijena = t1.min_price
+ ORDER BY ZCijena ASC)
+WHERE ROWNUM<4;

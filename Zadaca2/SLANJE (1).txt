@@ -1,0 +1,40 @@
+--1. Rezultat: 
+SELECT Sum(Length(ResNaziv)*7) FROM
+(ZAMJENA);
+ 
+--2. Rezultat:  
+SELECT Sum(Length(ResNaziv)*7 + Length("Datum Potpisivanja")*7) FROM
+(ZAMJENA);
+ 
+--3. Rezultat: 
+SELECT Sum(Length(naziv)*7) FROM
+(ZAMJENA);
+ 
+--4. Rezultat:   
+SELECT Sum(Length("Proizvod")*7 + Length("Proizvodjac")*7) FROM
+(ZAMJENA);
+ 
+--5. Rezultat:  
+SELECT Sum(Length("Ime i prezime")*7 + "iznos"*7) FROM
+(ZAMJENA); 
+ 
+--6. Rezultat: 
+SELECT Sum(Length("naziv")*7) FROM
+(ZAMJENA);
+
+--7. Rezultat 
+SELECT Sum(Length("Kupac")*7 + Round("Usteda")*7) FROM
+(ZAMJENA);
+ 
+--8. Rezultat: 
+ SELECT Sum(idisporuke*7 + idkurirske*7) FROM
+(ZAMJENA);
+ 
+--9. Rezultat: 
+SELECT Sum(Length(naziv)*7 + cijena*7) FROM
+(ZAMJENA);
+
+--10. Rezultat: 
+SELECT Sum(Length(naziv)*7 + Round(cijena)*7) FROM
+(ZAMJENA);
+ 
